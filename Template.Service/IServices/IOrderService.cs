@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Template.Entity;
 
-namespace Template.Entity
+namespace Template.Service.IServices
 {
-    public class Class1
+    public interface IOrderService : IService<Orders>
     {
     }
 }
