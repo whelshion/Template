@@ -1,5 +1,6 @@
 using CacheManager.Core;
 using Microsoft.Practices.Unity;
+using StackExchange.Redis;
 using System.Web.Http;
 using Template.Repository.IRepositories;
 using Template.Repository.Repositories;
@@ -34,6 +35,10 @@ namespace Template.WebServiceApi
                 typeof(ICacheManager<>),
                 new ContainerControlledLifetimeManager(),
                 new InjectionFactory((c, targetType, name) => CacheFactory.FromConfiguration(targetType.GenericTypeArguments[0], "myCache")));
+
+            _container.RegisterInstance(
+                typeof(ConnectionMultiplexer),
+                ConnectionMultiplexer.Connect("localhost"));
 
             GlobalConfiguration.Configuration.DependencyResolver = new UnityDependencyResolver(_container);
         }
