@@ -4,17 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DapperExtensions;
+using Template.Repository;
 
 namespace Template.Service
 {
-    public abstract class Service<TEntity> : IService<TEntity>
+    public abstract class Service<TEntity> : IService<TEntity> where TEntity : class
     {
-        public int Add(TEntity entity)
+        private readonly IRepository<TEntity> _repository;
+        protected Service(IRepository<TEntity> repository)
         {
-            throw new NotImplementedException();
+            this._repository = repository;
+        }
+        public TEntity Add(TEntity entity)
+        {
+            return _repository.Add(entity);
         }
 
-        public IList<TEntity> FindBy(IList<IPredicate> predicates)
+        public IList<TEntity> FindBy(IPredicateGroup predicates)
         {
             throw new NotImplementedException();
         }

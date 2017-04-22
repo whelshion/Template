@@ -30,9 +30,10 @@ namespace Template.WebServiceApi
             _container.RegisterType<IProductRepository, ProductRepository>(new HierarchicalLifetimeManager());
             _container.RegisterType<IProductService, ProductService>(new HierarchicalLifetimeManager());
 
-            _container.RegisterType<ICacheManager<object>>(
-                            new ContainerControlledLifetimeManager(),
-                            new InjectionFactory((c) => CacheFactory.Build(s => s.WithDictionaryHandle())));
+            _container.RegisterType(
+                typeof(ICacheManager<>),
+                new ContainerControlledLifetimeManager(),
+                new InjectionFactory((c, targetType, name) => CacheFactory.FromConfiguration(targetType.GenericTypeArguments[0], "myCache")));
 
             GlobalConfiguration.Configuration.DependencyResolver = new UnityDependencyResolver(_container);
         }

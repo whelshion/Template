@@ -10,19 +10,19 @@ namespace Template.Repository
 {
     public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        public void Add(TEntity entity)
+        public TEntity Add(TEntity entity)
         {
             using (var dbcontext = new DbFactory().CreateSqlConnection())
             {
-                dbcontext.Insert(entity);
+                return dbcontext.Insert(entity);
             }
         }
 
-        public IList<TEntity> FindBy(IList<IPredicate> predicates)
+        public IList<TEntity> FindBy(IPredicateGroup predicates)
         {
             using (var dbcontext = new DbFactory().CreateSqlConnection())
             {
-                return dbcontext.GetList<TEntity>().ToList();
+                return dbcontext.GetList<TEntity>(predicates).ToList();
             }
         }
 

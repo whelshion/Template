@@ -9,10 +9,10 @@ namespace Template.Repository
 {
     public interface IRepository<TEntity> where TEntity : class
     {
-        void Add(TEntity entity);
+        TEntity Add(TEntity entity);
         bool Update(TEntity entity);
         bool Remove(TEntity entity);
         TEntity GetById(object id);
-        IList<TEntity> FindBy(IList<IPredicate> predicates);
+        IList<TEntity> FindBy(IPredicateGroup predicates);
     }
 }

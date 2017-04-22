@@ -17,11 +17,6 @@ namespace Template.WebServiceApi.测试
         private static readonly UnityContainer _container = new UnityContainer();
         private ICustomerService _customerService;
 
-        [TestMethod]
-        public void TestMethod1()
-        {
-            
-        }
 
         [TestInitialize]
         public void SetUp()
@@ -35,9 +30,11 @@ namespace Template.WebServiceApi.测试
             _container.RegisterType<IProductRepository, ProductRepository>(new HierarchicalLifetimeManager());
             _container.RegisterType<IProductService, ProductService>(new HierarchicalLifetimeManager());
 
-            _container.RegisterType<ICacheManager<object>>(
-                            new ContainerControlledLifetimeManager(),
-                            new InjectionFactory((c) => CacheFactory.Build(s => s.WithDictionaryHandle())));
+            _container.RegisterType(
+                typeof(ICacheManager<>),
+                new ContainerControlledLifetimeManager(),
+                new InjectionFactory((c, targetType, name) => CacheFactory.FromConfiguration(targetType.GenericTypeArguments[0], "myCache")));
+
 
             _customerService = _container.Resolve<ICustomerService>();
         }
@@ -47,7 +44,7 @@ namespace Template.WebServiceApi.测试
         {
             Assert.IsNotNull(_container);
             Assert.IsNotNull(_customerService);
-            var list = _customerService.GetOrdersByCustomerId("");
+            var list = _customerService.GetOrdersByCustomerId("RICAR");
         }
     }
 }

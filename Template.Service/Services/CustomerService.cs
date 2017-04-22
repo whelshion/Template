@@ -18,7 +18,7 @@ namespace Template.Service.Services
         private readonly ICustomerRepository _customerRepository;
         private readonly IOrderRepository _orderRepository;
 
-        public CustomerService(ICacheManager<IDictionary<string, object>> cacheManager, ICustomerRepository customerRepository, IOrderRepository orderRepository)
+        public CustomerService(ICacheManager<IDictionary<string, object>> cacheManager, ICustomerRepository customerRepository, IOrderRepository orderRepository) : base(customerRepository)
         {
             this._cacheManager = cacheManager;
             this._customerRepository = customerRepository;
@@ -39,8 +39,11 @@ namespace Template.Service.Services
                 {
                     var predicate = Predicates.Field<Orders>(f => f.CustomerID, Operator.Eq, customerId);
                     var pg = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate> { predicate } };
-                    orderList = _orderRepository.FindBy(new List<IPredicate> { pg }).ToList();
-                    orderCaches.Add(customerId, orderList);
+                    orderList = _orderRepository.FindBy(pg).ToList();
+                    if (orderCaches == null)
+                        orderCaches = new Dictionary<string, object> { { customerId, orderList } };
+                    else
+                        orderCaches.Add(customerId, orderList);
                     _cacheManager.Add("_order", orderCaches);
                 }
             }

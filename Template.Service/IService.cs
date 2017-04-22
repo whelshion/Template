@@ -9,11 +9,11 @@ namespace Template.Service
 {
     public interface IService<TEntity>
     {
-        int Add(TEntity entity);
+        TEntity Add(TEntity entity);
         int Update(TEntity entity);
         int Remove(object id);
         bool IsExisted(object id);
         TEntity GetById(object id);
-        IList<TEntity> FindBy(IList<IPredicate> predicates);
+        IList<TEntity> FindBy(IPredicateGroup predicates);
     }
 }
