@@ -30,10 +30,30 @@ namespace Template.WebServiceApi.测试
             _container.RegisterType<IProductRepository, ProductRepository>(new HierarchicalLifetimeManager());
             _container.RegisterType<IProductService, ProductService>(new HierarchicalLifetimeManager());
 
+            //_container.RegisterType(
+            //    typeof(ICacheManager<>),
+            //    new ContainerControlledLifetimeManager(),
+            //    new InjectionFactory((c, targetType, name) => CacheFactory.FromConfiguration(targetType.GenericTypeArguments[0], "myCache")));
+
             _container.RegisterType(
                 typeof(ICacheManager<>),
-                new ContainerControlledLifetimeManager(),
-                new InjectionFactory((c, targetType, name) => CacheFactory.FromConfiguration(targetType.GenericTypeArguments[0], "myCache")));
+                new InjectionFactory((c, targetType, name) => CacheFactory.Build<object>(settings =>
+                {
+                    settings
+                        .WithSystemRuntimeCacheHandle()
+                        .And
+                        .WithRedisConfiguration("redis", config =>
+                        {
+                            config.WithAllowAdmin()
+                                .WithDatabase(0)
+                                .WithEndpoint("192.168.16.130", 6379)
+                                .WithPassword("1qaz@WSX");
+                        })
+                        .WithMaxRetries(1000)
+                        .WithRetryTimeout(100)
+                        .WithRedisBackplane("redis")
+                        .WithRedisCacheHandle("redis", true);
+                })));
 
 
             _customerService = _container.Resolve<ICustomerService>();
