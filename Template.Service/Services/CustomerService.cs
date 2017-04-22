@@ -33,41 +33,41 @@ namespace Template.Service.Services
         public IList<Orders> GetOrdersByCustomerId(string customerId)
         {
             var orderList = new List<Orders>();
-            using (var context = new DbFactory().CreateSqlConnection())
-            {
-                //var orderCaches = _cacheManager.Get("_order");
-                //if (orderCaches != null && orderCaches.ContainsKey(customerId))
-                //{
-                //    orderList = (List<Orders>)orderCaches[customerId];
-                //}
-                //else
-                //{
-                //    var predicate = Predicates.Field<Orders>(f => f.CustomerID, Operator.Eq, customerId);
-                //    var pg = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate> { predicate } };
-                //    orderList = _orderRepository.FindBy(pg).ToList();
-                //    if (orderCaches == null)
-                //        orderCaches = new Dictionary<string, object> { { customerId, orderList } };
-                //    else
-                //        orderCaches.Add(customerId, orderList);
-                //    _cacheManager.Add("_order", orderCaches);
-                //}
+            //var orderCaches = _cacheManager.Get("_order");
+            //if (orderCaches != null && orderCaches.ContainsKey(customerId))
+            //{
+            //    orderList = (List<Orders>)orderCaches[customerId];
+            //}
+            //else
+            //{
+            //    var predicate = Predicates.Field<Orders>(f => f.CustomerID, Operator.Eq, customerId);
+            //    var pg = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate> { predicate } };
+            //    orderList = _orderRepository.FindBy(pg).ToList();
+            //    if (orderCaches == null)
+            //        orderCaches = new Dictionary<string, object> { { customerId, orderList } };
+            //    else
+            //        orderCaches.Add(customerId, orderList);
+            //    _cacheManager.Add("_order", orderCaches);
+            //}
 
-                using (_redisPlexer)
+            using (_redisPlexer)
+            {
+                var redisDb = _redisPlexer.GetDatabase();
+                string cacheString = redisDb.StringGet("_order_list_" + customerId);
+                var cacheList = cacheString == null ? null : JsonConvert.DeserializeObject<List<Orders>>(redisDb.StringGet("_order_list_" + customerId));
+                if (cacheList == null)
                 {
-                    var redisDb = _redisPlexer.GetDatabase();
-                    string cacheString = redisDb.StringGet("_order_list_" + customerId);
-                    var cacheList = cacheString == null ? null : JsonConvert.DeserializeObject<List<Orders>>(redisDb.StringGet("_order_list_" + customerId));
-                    if (cacheList == null)
+                    using (var context = new DbFactory().CreateSqlConnection())
                     {
                         var predicate = Predicates.Field<Orders>(f => f.CustomerID, Operator.Eq, customerId);
                         var pg = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate> { predicate } };
                         orderList = _orderRepository.FindBy(pg).ToList();
                         redisDb.StringSet("_order_list_" + customerId, JsonConvert.SerializeObject(orderList));
                     }
-                    else
-                    {
-                        orderList = cacheList;
-                    }
+                }
+                else
+                {
+                    orderList = cacheList;
                 }
             }
             return orderList;
