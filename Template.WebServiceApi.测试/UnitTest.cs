@@ -17,6 +17,7 @@ namespace Template.WebServiceApi.测试
     {
         private static readonly UnityContainer _container = new UnityContainer();
         private ICustomerService _customerService;
+        private ITestOne2Multi _t;
 
 
         [TestInitialize]
@@ -42,6 +43,11 @@ namespace Template.WebServiceApi.测试
                 ConnectionMultiplexer.Connect("localhost"));
 
 
+            _container.RegisterType<ITestOne2Multi, TestOne2Multi1>("t1", new HierarchicalLifetimeManager());
+            _container.RegisterType<ITestOne2Multi, TestOne2Multi2>("t2", new HierarchicalLifetimeManager());
+
+            _t = _container.Resolve<ITestOne2Multi>("t2");
+
             _customerService = _container.Resolve<ICustomerService>();
         }
 
@@ -52,5 +58,27 @@ namespace Template.WebServiceApi.测试
             Assert.IsNotNull(_customerService);
             var list = _customerService.GetOrdersByCustomerId("RICAR");
         }
+
+        [TestMethod]
+        public void Test_One2Multi()
+        {
+            Assert.IsNotNull(_t);
+
+        }
+    }
+
+    public interface ITestOne2Multi
+    {
+
+    }
+
+    [TestClass]
+    public class TestOne2Multi1 : ITestOne2Multi
+    {
+    }
+
+    [TestClass]
+    public class TestOne2Multi2 : ITestOne2Multi
+    {
     }
 }
